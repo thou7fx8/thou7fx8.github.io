@@ -930,8 +930,8 @@ document.addEventListener('touchstart', initAudio, { once: true });
             </div>
         </div>
         <div class="window-actions">
-            <!-- Start login sequence on user gesture; login() will handle intro playback -->
-            <button class="btn" onclick="login()">OK</button>
+            <!-- Call playLoginSound first (user gesture) then proceed with login() -->
+            <button class="btn" onclick="playIntroSound(0.5); setTimeout(() => login(), 300)">OK</button>
             <button class="btn" type="reset" form="login">Cancel</button>
         </div>
     </div>
