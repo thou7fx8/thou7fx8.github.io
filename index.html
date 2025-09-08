@@ -1416,113 +1416,171 @@ document.addEventListener('touchstart', initAudio, { once: true });
         // Open profile window
         (function installIntroGuard(){
             if (window.__introGuardInstalled) return;
-
             // shared state to prevent overlapping or repeated intro playback
-            window.__introState = window.__introState || {
-            playing: false,
-            played: false,
-            promise: null,
-            resolve: null,
-            audio: null
-            };
+            (function installIntroGuard(){
+                if (window.__introGuardInstalled) return;
 
-            function getOrCreateIntroAudio(volume) {
-            // reuse existing element if present
-            let audio = window.__introState.audio || document.getElementById('intro-sound');
-            if (!audio) {
-                audio = document.createElement('audio');
-                audio.id = 'intro-sound';
-                audio.src = 'intro.mp3';
-                audio.preload = 'auto';
-                audio.style.display = 'none';
-                document.body.appendChild(audio);
-            }
-            window.__introState.audio = audio;
-            if (typeof volume === 'number') {
-                try { audio.volume = Math.max(0, Math.min(1, volume)); } catch(e){}
-            }
-            return audio;
-            }
+                window.__introState = window.__introState || {
+                    playing: false,
+                    played: false,
+                    promise: null,
+                    resolve: null,
+                    audio: null
+                };
 
-            // Robust single-play wrapper returning a Promise.
-            // Subsequent calls while playing return the same Promise.
-            window.playIntroSound = function(volume) {
-            const state = window.__introState;
-
-            // If already played once, do not play again
-            if (state.played) {
-                return Promise.resolve();
-            }
-
-            // If currently playing, return the existing promise
-            if (state.playing && state.promise) {
-                return state.promise;
-            }
-
-            state.playing = true;
-            state.promise = new Promise((resolve) => {
-                const audio = getOrCreateIntroAudio(volume);
-
-                // Ensure we start from the beginning
-                try { audio.currentTime = 0; } catch(e) {}
-
-                function cleanupAndResolve() {
-                state.playing = false;
-                state.played = true;
-                audio.removeEventListener('ended', onEnded);
-                audio.removeEventListener('error', onError);
-                if (state.resolve) {
-                    state.resolve();
-                }
-                resolve();
+                function getOrCreateIntroAudio(volume) {
+                    // reuse existing element if present
+                    let audio = window.__introState.audio || document.getElementById('intro-sound');
+                    if (!audio) {
+                        audio = document.createElement('audio');
+                        audio.id = 'intro-sound';
+                        audio.src = 'intro.mp3';
+                        audio.preload = 'auto';
+                        audio.style.display = 'none';
+                        document.body.appendChild(audio);
+                    }
+                    window.__introState.audio = audio;
+                    if (typeof volume === 'number') {
+                        try { audio.volume = Math.max(0, Math.min(1, volume)); } catch(e){}
+                    }
+                    return audio;
                 }
 
-                function onEnded() {
-                cleanupAndResolve();
-                }
-                function onError() {
-                // treat errors as completion to avoid stuck state
-                cleanupAndResolve();
+                // pause any other intro audio elements to avoid duplicates (robust for GH pages)
+                function silenceOtherIntroElements(ourAudio) {
+                    try {
+                        const audios = document.querySelectorAll('audio');
+                        audios.forEach(a => {
+                            if (a === ourAudio) return;
+                            const src = (a.src || '').split('?')[0];
+                            if (!src) return;
+                            // compare filename only to be tolerant of absolute/relative paths
+                            const name = src.split('/').pop().toLowerCase();
+                            if (name === 'intro.mp3' || a.id === 'intro-sound') {
+                                try {
+                                    a.pause();
+                                    a.currentTime = 0;
+                                } catch(e){}
+                            }
+                        });
+                    } catch(e){}
                 }
 
-                audio.removeEventListener('ended', onEnded);
-                audio.removeEventListener('error', onError);
-                audio.addEventListener('ended', onEnded, { once: true });
-                audio.addEventListener('error', onError, { once: true });
+                // Robust single-play wrapper returning a Promise.
+                // Subsequent calls while playing return the same Promise.
+                window.playIntroSound = function(volume) {
+                    const state = window.__introState;
 
-                // Try to play; browsers may reject without gesture, handle rejection gracefully
-                const playPromise = audio.play();
-                if (playPromise && playPromise.catch) {
-                playPromise.catch((err) => {
-                    // If play rejected, still mark as not playing so caller can retry later
-                    console.warn('intro audio play rejected:', err);
-                    // Give a small delay then resolve to avoid immediate double-calls
-                    setTimeout(() => {
+                    // If already played once, do not play again
+                    if (state.played) {
+                        return Promise.resolve();
+                    }
+
+                    // If currently playing, return the existing promise
+                    if (state.playing && state.promise) {
+                        return state.promise;
+                    }
+
+                    state.playing = true;
+                    state.promise = new Promise((resolve) => {
+                        const audio = getOrCreateIntroAudio(volume);
+
+                        // Ensure we start from the beginning
+                        try { audio.currentTime = 0; } catch(e) {}
+
+                        // make sure any stray duplicates are silenced
+                        silenceOtherIntroElements(audio);
+
+                        function cleanupAndResolve() {
+                            state.playing = false;
+                            state.played = true;
+                            audio.removeEventListener('ended', onEnded);
+                            audio.removeEventListener('error', onError);
+                            state.promise = null;
+                            state.resolve = null;
+                            resolve();
+                        }
+
+                        function onEnded() {
+                            cleanupAndResolve();
+                        }
+                        function onError() {
+                            // treat errors as completion to avoid stuck state
+                            cleanupAndResolve();
+                        }
+
+                        // Remove any previous listeners then add once-only listeners
+                        audio.removeEventListener('ended', onEnded);
+                        audio.removeEventListener('error', onError);
+                        audio.addEventListener('ended', onEnded, { once: true });
+                        audio.addEventListener('error', onError, { once: true });
+
+                        // Try to play; browsers may reject without gesture, handle rejection gracefully
+                        const playPromise = audio.play();
+                        if (playPromise && playPromise.catch) {
+                            playPromise.catch((err) => {
+                                // If play rejected, still clear playing flag so caller can retry later
+                                console.warn('intro audio play rejected:', err);
+                                setTimeout(() => {
+                                    state.playing = false;
+                                    state.promise = null;
+                                    resolve();
+                                }, 50);
+                            });
+                        }
+
+                        // expose resolver for external use if needed
+                        state.resolve = resolve;
+                    });
+
+                    return state.promise;
+                };
+
+                // expose a reset helper (useful for debugging or forced replay)
+                window.resetIntroSoundState = function() {
+                    const state = window.__introState || {};
                     state.playing = false;
+                    state.played = false;
                     state.promise = null;
-                    resolve();
-                    }, 50);
+                    state.resolve = null;
+                    // do not remove the audio element (keeps reuse)
+                };
+
+                // Ensure the login OK button uses this guarded playback (replaces inline onclick)
+                document.addEventListener('DOMContentLoaded', function () {
+                    try {
+                        const okBtn = document.querySelector('#login-window .window-actions .btn');
+                        if (okBtn) {
+                            // remove any inline onclick to avoid duplicate handlers
+                            try { okBtn.removeAttribute('onclick'); } catch(e){}
+
+                            okBtn.addEventListener('click', function (e) {
+                                // Prevent default form submit or other inline actions
+                                e.preventDefault();
+
+                                // If already played once, skip playing and proceed with login
+                                if (window.__introState && window.__introState.played) {
+                                    // still call login as expected
+                                    setTimeout(() => { if (typeof login === 'function') login(); }, 300);
+                                    return;
+                                }
+
+                                // Play intro via guarded function (won't allow duplicates)
+                                try {
+                                    window.playIntroSound(0.5);
+                                } catch (err) {
+                                    console.warn('playIntroSound failed:', err);
+                                }
+
+                                // proceed to login after the usual small delay
+                                setTimeout(() => { if (typeof login === 'function') login(); }, 300);
+                            }, { passive: true });
+                        }
+                    } catch (e) {}
                 });
-                }
-                // expose resolver for external use if needed
-                state.resolve = resolve;
-            });
 
-            return state.promise;
-            };
-
-            // expose a reset helper (useful for debugging or forced replay)
-            window.resetIntroSoundState = function() {
-            const state = window.__introState || {};
-            state.playing = false;
-            state.played = false;
-            state.promise = null;
-            state.resolve = null;
-            // do not remove the audio element (keeps reuse)
-            };
-
-            window.__introGuardInstalled = true;
-        })();
+                window.__introGuardInstalled = true;
+            })();
 
         function openProfile(userId) {
             // Close start menu if open
