@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7 - Windows 95 Experience</title>
+    <meta name="description" content="A nostalgic Windows 95 experience">
+    <meta name="theme-color" content="#000000">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+        }
+        
+        body {
+            background: #000000;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            cursor: default;
+        }
+        
+        #desktop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 40px);
+            background: #000000 url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTExMTExIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiMwODA4MDgiIGZpbGw9Im5vbmUiPjwvcGF0aD4KPC9zdmc+');
+            overflow: hidden;
+        }
+        
+        /* Animated desktop background */
+        #desktop::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 100, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(50, 150, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(0, 80, 200, 0.1) 0%, transparent 20%);
+            pointer-events: none;
+            animation: backgroundPulse 15s infinite alternate;
+        }
+        
+        @keyframes backgroundPulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.4; }
+        }
+        
+        .desktop-icons {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+            padding: 5px;
+            color: #cccccc;
+            text-align: center;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px #000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .desktop-icon:hover {
+            background-color: rgba(0, 100, 255, 0.3);
+            transform: scale(1.05) translateY(-5px);
+        }
+        
+        .desktop-icon::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 4px;
+            background: rgba(0, 100, 255, 0.2);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .desktop-icon:hover::after {
+            opacity: 1;
+            animation: iconGlow 1.5s infinite alternate;
+        }
+        
+        @keyframes iconGlow {
+            from { box-shadow: 0 0 5px rgba(0, 100, 255, 0.5); }
+            to { box-shadow: 0 0 15px rgba(50, 150, 255, 0.8); }
+        }
+        
+        .icon-placeholder {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+            background: linear-gradient(145deg, #222222, #111111);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: #cccccc;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .icon-placeholder::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.2), rgba(255,255,255,0));
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+        
+        .desktop-icon:hover .icon-placeholder {
+            background: linear-gradient(145deg, #333333, #222222);
+            border-color: #666666 #222222 #222222 #666666;
+            animation: pulse 1s infinite, iconShine 2s infinite;
+        }
+        
+        @keyframes iconShine {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(3deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        #toolbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to bottom, #222222, #111111);
+            border-top: 2px solid #555555;
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            z-index: 1000;
+            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.7);
+        }
+        
+        .start-button {
+            height: 30px;
+            padding: 0 10px;
+            background: linear-gradient(to bottom, #333333, #222222);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #cccccc;
+            text-shadow: 1px 1px 1px #000;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .start-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .start-button:hover::before {
+            left: 100%;
+        }
+        
+        .start-button:hover {
+            background: linear-gradient(to bottom, #444444, #333333);
+            animation: buttonGlow 1.5s infinite alternate;
+            transform: translateY(-2px);
+        }
+        
+        /* Click animation */
+        .start-button:active {
+            border-color: #111111 #555555 #555555 #111111;
+            transform: translateY(0) scale(0.95);
+            animation: clickEffect 0.3s;
+        }
+        
+        @keyframes clickEffect {
+            0% { box-shadow: 0 0 0 0 rgba(0, 100, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 100, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 100, 255, 0); }
+        }
+        
+        @keyframes buttonGlow {
+            from { 
+                box-shadow: 0 0 5px #0066ff, 0 0 10px rgba(0, 100, 255, 0.3);
+            }
+            to { 
+                box-shadow: 0 0 15px #0099ff, 0 0 20px rgba(0, 150, 255, 0.5);
+            }
+        }
+        
+        .toolbar-separator {
+            height: 30px;
+            width: 2px;
+            background: #111111;
+            margin: 0 5px;
+            border-left: 1px solid #555555;
+        }
+        
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+        }
+        
+        .toolbar-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(to bottom, #333333, #222222);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #cccccc;
+            transition: all 0.3s ease;
+        }
+        
+        .toolbar-icon:hover {
+            background: linear-gradient(to bottom, #444444, #333333);
+            animation: shake 0.5s, iconPulse 1s infinite;
+            transform: translateY(-3px);
+        }
+        
+        .toolbar-icon:active {
+            transform: scale(0.9);
+            animation: clickEffect 0.3s;
+        }
+        
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time {
+            padding: 3px 8px;
+            background: linear-gradient(to bottom, #222222, #111111);
+            border: 2px solid;
+            border-color: #111111 #555555 #555555 #111111;
+            font-size: 12px;
+            color: #cccccc;
+            text-shadow: 1px 1px 1px #000;
+            transition: all 0.3s ease;
+        }
+        
+        .time:hover {
+            animation: timePulse 1s infinite;
+        }
+        
+        @keyframes timePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .window {
+            position: absolute;
+            background: linear-gradient(to bottom, #222222, #111111);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.8);
+            min-width: 300px;
+            min-height: 200px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .window::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .title-bar {
+            background: linear-gradient(90deg, #111111, #222222);
+            color: #cccccc;
+            padding: 3px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: move;
+            text-shadow: 1px 1px 1px #000;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .title-bar-controls {
+            display: flex;
+        }
+        
+        .title-bar-controls button {
+            width: 16px;
+            height: 14px;
+            margin-left: 2px;
+            background: linear-gradient(to bottom, #333333, #222222);
+            border: 1px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            font-size: 9px;
+            font-weight: bold;
+            color: #cccccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .title-bar-controls button:hover {
+            background: linear-gradient(to bottom, #444444, #333333);
+            transform: scale(1.1);
+        }
+        
+        .title-bar-controls button:active {
+            transform: scale(0.9);
+        }
+        
+        .window-body {
+            padding: 10px;
+        }
+        /* Remove blue glowing orbs on the desktop background */
+        #desktop::before {
+            background: none !important;
+            opacity: 0 !important;
+            display: none !important;
+            pointer-events: none !important;
+        }
+        .window-body {
+            height: calc(100% - 25px);
+            overflow: auto;
+            color: #cccccc;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Enhanced animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+            75% { transform: translateX(-2px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @keyframes iconPulse {
+            0% { box-shadow: 0 0 5px rgba(0, 100, 255, 0.5); }
+            50% { box-shadow: 0 0 10px rgba(50, 150, 255, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 100, 255, 0.5); }
+        }
+        
+        .login-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.98);
+            width: 360px;
+            max-width: calc(100vw - 40px);
+            z-index: 2000;
+            display: block;
+            will-change: transform, opacity;
+            animation: evilAppear 400ms cubic-bezier(.2,.9,.2,1) forwards, windowFloat 5s ease-in-out infinite;
+        }
+        
+        @keyframes evilAppear {
+            0% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+                filter: blur(10px);
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(1.05) rotate(2deg);
+                filter: blur(0);
+            }
+            100% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0);
+            }
+        }
+        
+        @keyframes windowFloat {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+            50% { transform: translate(-50%, -50%) translateY(-5px); }
+        }
+        
+        .field-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .field-row label {
+            width: 80px;
+            color: #cccccc;
+        }
+        
+        .field-row input {
+            flex: 1;
+            padding: 3px 5px;
+            border: 2px solid;
+            border-color: #111111 #555555 #555555 #111111;
+            background: #222222;
+            color: #cccccc;
+            transition: all 0.3s ease;
+        }
+        
+        .field-row input:focus {
+            outline: none;
+            border-color: #0066ff #003366 #003366 #0066ff;
+            box-shadow: 0 0 10px rgba(0, 100, 255, 0.5);
+        }
+        
+        .window-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+            padding: 10px;
+            border-top: 2px solid #111111;
+        }
+        
+        .btn {
+            padding: 5px 15px;
+            background: linear-gradient(to bottom, #333333, #222222);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            min-width: 75px;
+            font-weight: bold;
+            color: #cccccc;
+            text-shadow: 1px 1px 1px #000;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to bottom, #444444, #333333);
+            animation: buttonGlow 1.5s infinite alternate;
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            border-color: #111111 #555555 #555555 #111111;
+            transform: translateY(0) scale(0.95);
+            animation: clickEffect 0.3s;
+        }
+        
+        /* Profile window styles */
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #111111;
+        }
+        
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(to bottom, #333333, #222222);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #cccccc;
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #cccccc;
+        }
+        
+        .profile-details {
+            font-size: 13px;
+            color: #aaaaaa;
+        }
+        
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .profile-section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border: 1px solid #111111;
+        }
+        
+        .profile-section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #cccccc;
+            border-bottom: 1px solid #111111;
+            padding-bottom: 5px;
+        }
+        
+        /* Text file styles */
+        .text-file {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+            padding: 5px;
+            color: #cccccc;
+            text-align: center;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px #000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: absolute;
+        }
+        
+        .text-file:hover {
+            background-color: rgba(0, 100, 255, 0.3);
+            transform: scale(1.05) translateY(-5px);
+        }
+        
+        .text-file-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+            background: linear-gradient(145deg, #006600, #004400);
+            border: 2px solid;
+            border-color: #00aa00 #004400 #004400 #00aa00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: #ccffcc;
+            transition: all 0.3s ease;
+        }
+        
+        .text-file:hover .text-file-icon {
+            background: linear-gradient(145deg, #00cc00, #008800);
+            border-color: #00ff00 #008800 #008800 #00ff00;
+            animation: pulse 1s infinite;
+        }
+        
+        /* Text file content window */
+        .text-content {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            background: #222222;
+            padding: 10px;
+            border: 1px solid #111111;
+            max-height: 300px;
+            overflow: auto;
+            color: #cccccc;
+        }
+        
+        /* Start menu */
+        #start-menu {
+            position: absolute;
+            bottom: 40px;
+            left: 5px;
+            width: 200px;
+            background: linear-gradient(to bottom, #222222, #111111);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            display: none;
+            z-index: 1000;
+            animation: menuSlide 0.3s forwards, menuGlow 2s infinite alternate;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.7);
+        }
+        
+        @keyframes menuSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes menuGlow {
+            from { box-shadow: 0 5px 25px rgba(0, 0, 0, 0.7); }
+            to { box-shadow: 0 5px 25px rgba(0, 100, 255, 0.4); }
+        }
+        
+        .start-menu-header {
+            background: linear-gradient(90deg, #111111, #222222);
+            color: #cccccc;
+            padding: 5px;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px #000;
+        }
+        
+        .start-menu-item {
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #cccccc;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .start-menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .start-menu-item:hover::before {
+            left: 100%;
+        }
+        
+        .start-menu-item:hover {
+            background: #222222;
+            color: #0066ff;
+            padding-left: 15px;
+            transform: translateX(5px);
+        }
+        
+        .start-menu-item:active {
+            transform: translateX(5px) scale(0.95);
+            animation: clickEffect 0.3s;
+        }
+        
+        .start-menu-separator {
+            height: 2px;
+            background: #111111;
+            margin: 5px;
+            border-top: 1px solid #555555;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .volume-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(to bottom, #333333, #222222);
+            border: 2px solid;
+            border-color: #555555 #111111 #111111 #555555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #cccccc;
+        }
+        
+        /* Window open animation */
+        .window {
+            animation: windowOpen 0.5s forwards;
+            transform-origin: center;
+        }
+        
+        @keyframes windowOpen {
+            0% { 
+                opacity: 0;
+                transform: scale(0.8) rotateX(10deg);
+                filter: blur(10px);
+            }
+            100% { 
+                opacity: 1;
+                transform: scale(1) rotateX(0);
+                filter: blur(0);
+            }
+        }
+    </style>
+
+    <script>
+// Audio context for sound effects
+let audioContext;
+let audioBuffer;
+
+// Initialize audio when the user first interacts with the page
+function initAudio() {
+    if (audioContext) return;
+    
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioContext();
+        
+        // Load the login sound
+        fetch('login-sound.mp3')
+            .then(response => response.arrayBuffer())
+            .then(data => audioContext.decodeAudioData(data))
+            .then(buffer => {
+                audioBuffer = buffer;
+            })
+            .catch(err => console.log('Error loading audio:', err));
+    } catch (e) {
+        console.log('Web Audio API is not supported in this browser');
+    }
+}
+
+// Play login sound using Web Audio API at specified volume
+// Login sound state
+let loginSoundPlaying = false;
+let loginSoundSource = null;
+let loginSoundGain = null;
+let loginSoundAudio = null;
+let loginSoundMuted = false;
+let loginSoundVolume = 0.5; // default 50%
+
+// Play login sound with fade-in and replay after finish
+function playLoginSound(fadeTo = 0.5, fadeTime = 3000) {
+    if (loginSoundPlaying) return; // Prevent overlapping
+    loginSoundPlaying = true;
+
+    // Get current volume from slider
+    const slider = document.getElementById('volume-slider');
+    if (slider) {
+        loginSoundVolume = slider.value / 100;
+        fadeTo = loginSoundVolume;
+    }
+    // If muted, don't play
+    if (loginSoundMuted || fadeTo === 0) {
+        loginSoundPlaying = false;
+        return;
+    }
+
+    if (audioContext && audioBuffer) {
+        loginSoundSource = audioContext.createBufferSource();
+        loginSoundGain = audioContext.createGain();
+        loginSoundSource.buffer = audioBuffer;
+        loginSoundGain.gain.value = 0.0;
+        loginSoundSource.connect(loginSoundGain);
+        loginSoundGain.connect(audioContext.destination);
+        loginSoundSource.start(0);
+        // Fade in to fadeTo over fadeTime
+        loginSoundGain.gain.linearRampToValueAtTime(fadeTo, audioContext.currentTime + fadeTime / 1000);
+        // Fade out at end
+        loginSoundSource.onended = function() {
+            loginSoundPlaying = false;
+            // Play again after finish
+            setTimeout(() => {
+                playLoginSound(fadeTo, fadeTime);
+            }, 100);
+        };
+    } else {
+        // Fallback to HTML5 audio
+        loginSoundAudio = document.getElementById('login-sound');
+        if (loginSoundAudio) {
+            loginSoundAudio.currentTime = 0;
+            loginSoundAudio.volume = 0.0;
+            loginSoundAudio.muted = loginSoundMuted;
+            loginSoundAudio.play().then(() => {
+                // Fade in
+                let step = 0;
+                const steps = 30;
+                const interval = fadeTime / steps;
+                function fade() {
+                    step++;
+                    loginSoundAudio.volume = Math.min(fadeTo, step / steps * fadeTo);
+                    if (step < steps) setTimeout(fade, interval);
+                }
+                fade();
+            }).catch(e => {});
+            loginSoundAudio.onended = function() {
+                loginSoundPlaying = false;
+                setTimeout(() => {
+                    playLoginSound(fadeTo, fadeTime);
+                }, 100);
+            };
+        } else {
+            loginSoundPlaying = false;
+        }
+    }
+}
+
+// Volume slider and mute button logic
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.getElementById('volume-slider');
+    const muteBtn = document.getElementById('mute-btn');
+    if (slider) {
+        slider.addEventListener('input', function() {
+            loginSoundVolume = slider.value / 100;
+            if (loginSoundGain && typeof loginSoundGain.gain.value === 'number') loginSoundGain.gain.value = loginSoundMuted ? 0 : loginSoundVolume;
+            if (loginSoundAudio && typeof loginSoundAudio.volume === 'number') loginSoundAudio.volume = loginSoundMuted ? 0 : loginSoundVolume;
+        });
+    }
+    if (muteBtn) {
+        muteBtn.addEventListener('click', function() {
+            loginSoundMuted = !loginSoundMuted;
+            muteBtn.textContent = loginSoundMuted ? '🔇' : '🔊';
+            if (loginSoundGain && typeof loginSoundGain.gain.value === 'number') loginSoundGain.gain.value = loginSoundMuted ? 0 : loginSoundVolume;
+            if (loginSoundAudio && typeof loginSoundAudio.muted === 'boolean') loginSoundAudio.muted = loginSoundMuted;
+        });
+    }
+});
+
+// Play intro.mp3 at specified volume
+function playIntroSound(volume = 0.5) {
+    let audio = document.getElementById('intro-sound');
+    if (!audio) {
+        audio = document.createElement('audio');
+        audio.id = 'intro-sound';
+        audio.src = 'intro.mp3';
+        audio.preload = 'auto';
+        document.body.appendChild(audio);
+    }
+    audio.currentTime = 0;
+    audio.volume = volume;
+    audio.play().catch(e => console.log('Intro audio play failed:', e));
+}
+// Initialize audio on any user interaction
+document.addEventListener('click', initAudio, { once: true });
+document.addEventListener('keydown', initAudio, { once: true });
+document.addEventListener('touchstart', initAudio, { once: true });
+</script>
+</head>
+<body>
+    <!-- Audio Element (kept as fallback) -->
+    <audio id="login-sound" src="login-sound.mp3" preload="auto"></audio>
+
+    <!-- Login Window -->
+    <div class="window login-window" id="login-window">
+        <div class="title-bar">
+            <div class="title-bar-text">Welcome To 7 OS</div>
+            <div class="title-bar-controls">
+                <button aria-label="Close" onclick="closeWindow(this)">X</button>
+            </div>
+        </div>
+        <div class="window-body">
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                <div class="icon-placeholder" style="background: linear-gradient(to bottom, #333333, #222222);">💣</div>
+                <form id="login" style="margin-left: 20px;">
+                    <div>                            
+                        <p style="margin-bottom: 1rem; color: #cccccc;">Type your credentials to access the system.</p>
+                        <br>
+                        <div class="field-row">
+                            <label for="username">Username</label>
+                            <input id="username" type="text" value="User">
+                        </div>
+                        <div class="field-row">
+                            <label for="password">Password</label>
+                            <input id="password" type="password" value="········">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="window-actions">
+            <!-- Call playLoginSound first (user gesture) then proceed with login() -->
+            <button class="btn" onclick="playIntroSound(0.5); setTimeout(() => login(), 300)">OK</button>
+            <button class="btn" type="reset" form="login">Cancel</button>
+        </div>
+    </div>
+
+
+    <!-- Desktop -->
+    <div id="desktop" style="display: none;">
+        <div class="desktop-icons">
+            <div class="desktop-icon" onclick="openProfile('user1')">
+            <div class="icon-placeholder">👤</div>
+            <span>7FX8</span>
+            </div>
+            <div class="desktop-icon" onclick="openProfile('user2')">
+            <div class="icon-placeholder">👤</div>
+            <span>UHXT</span>
+            </div>
+            <div class="desktop-icon" onclick="openProfile('user3')">
+            <div class="icon-placeholder">👤</div>
+            <span>Horrified</span>
+            </div>
+            <div class="desktop-icon" onclick="openProfile('user4')">
+            <div class="icon-placeholder">👤</div>
+            <script>
+                // Point the existing <audio id="login-sound"> to the local file in the same folder
+                (function(){
+                const audio = document.getElementById('login-sound');
+                if (!audio) return;
+                audio.src = 'login-sound.mp3';
+                audio.preload = 'auto';
+                try { audio.load(); } catch(e) {}
+                })();
+            </script>
+            <span>Ace</span>
+            </div>
+        </div>
+        <!-- Ensure intro video audio is allowed and desktop reveal is idempotent -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const video = document.getElementById('intro-video');
+            const desktop = document.getElementById('desktop');
+            window.__desktopRevealed = false;
+
+            function revealDesktopImmediate() {
+            if (window.__desktopRevealed) return;
+            window.__desktopRevealed = true;
+
+            if (!desktop) {
+                // shorten post-intro delay to 1s
+                (function(){
+                    const postIntroDelay = 1000; // 1 second
+                    window.__postIntroDelay = postIntroDelay;
+
+                    setTimeout(() => {
+                        try { if (video) video.remove(); } catch (e) {}
+                    }, postIntroDelay);
+                })();
+                return;
+            }
+
+            desktop.style.display = 'block';
+            desktop.style.opacity = '0';
+            void desktop.offsetWidth;
+            desktop.style.transition = 'opacity 4s ease';
+            desktop.style.opacity = '1';
+
+            setTimeout(() => {
+                if (video) {
+                    video.style.transition = 'opacity 0.8s ease';
+                    video.style.opacity = '0';
+                    setTimeout(() => {
+                        try { video.remove(); } catch (e) {}
+                    }, 900);
+                }
+                // Play login sound after desktop fade-in completes
+                playLoginSound(0.25);
+            }, 4000);
+            }
+
+            // Expose for other scripts (safe to call multiple times)
+            window.revealDesktopImmediate = revealDesktopImmediate;
+
+            if (!video) return;
+
+            // Prefer to unmute + set volume; keep playsInline for mobile
+            try {
+            video.playsInline = true;
+            video.muted = false;
+            video.volume = 1;
+            } catch (e) {}
+
+            // Helper: attach video element audio into a resumed AudioContext so browsers accept playback
+            function attachVideoToAudioContext() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return false;
+
+                if (!window._loginAudioCtx) {
+                window._loginAudioCtx = new AudioCtx();
+                }
+                const ctx = window._loginAudioCtx;
+
+                // resume if suspended
+                if (ctx.state === 'suspended' && ctx.resume) {
+                ctx.resume().catch(()=>{});
+                }
+
+                // create and connect a MediaElementSource only once
+                if (!window.__videoSourceAttached) {
+                try {
+                    // createMediaElementSource can throw if the media is cross-origin without CORS headers;
+                    // local files usually work. Wrap in try/catch to avoid breaking.
+                    const src = ctx.createMediaElementSource(video);
+                    src.connect(ctx.destination);
+                    window.__videoSourceAttached = true;
+                } catch (err) {
+                    console.warn('createMediaElementSource failed', err);
+                }
+                }
+
+                // ensure video unmuted and audible
+                try { video.muted = false; video.volume = 1; } catch(e){}
+
+                return true;
+            } catch (err) {
+                return false;
+            }
+            }
+
+            // On the first user gesture, attach the media element to AudioContext to satisfy autoplay policy
+            function onFirstGesture() {
+            attachVideoToAudioContext();
+            // remove listeners
+            window.removeEventListener('pointerdown', onFirstGesture, true);
+            window.removeEventListener('keydown', onFirstGesture, true);
+            }
+            window.addEventListener('pointerdown', onFirstGesture, { once: true, capture: true });
+            window.addEventListener('keydown', onFirstGesture, { once: true, capture: true });
+
+            // Also try to attach when video begins to play
+            video.addEventListener('play', function () {
+            attachVideoToAudioContext();
+            }, { once: true });
+
+            // Robust handlers: ended, error and stalled -> reveal desktop immediately
+            video.addEventListener('ended', function() {
+                playLoginSound(0.0, 3000); // Start at 0% volume, fade to slider value over 3s
+                revealDesktopImmediate();
+            }, { once: true });
+            video.addEventListener('error', revealDesktopImmediate, { once: true });
+            video.addEventListener('stalled', revealDesktopImmediate, { once: true });
+
+            // Fallback: if the video does not start playing within 12s, reveal the desktop
+            const fallback = setTimeout(() => revealDesktopImmediate(), 12000);
+            video.addEventListener('play', () => clearTimeout(fallback), { once: true });
+        });
+        </script>
+        <!-- Intro video element (created here so it's available when login() is overridden) -->
+        <video id="intro-video" src="intro.mp4" playsinline preload="auto" style="display:none; position:fixed; inset:0; width:100%; height:100%; object-fit:cover; background:#000; z-index:9999;"></video>
+
+        <script>
+            // Override the existing login() after the page finishes parsing so our behavior replaces the original.
+            document.addEventListener('DOMContentLoaded', function () {
+            // Replace login with function that plays intro.mp4 fullscreen, then fades desktop in over 4s.
+            window.login = function() {
+                const loginWindow = document.getElementById('login-window');
+                const video = document.getElementById('intro-video');
+                const desktop = document.getElementById('desktop');
+
+                // Make sure the video element is placed at the top level so hiding #desktop won't hide it.
+                // This moves the <video> out of the #desktop container if necessary.
+                if (video && video.parentElement !== document.body) {
+                    try {
+                        document.body.appendChild(video);
+                    } catch (e) {
+                        // ignore if append fails
+                    }
+                }
+
+                // Immediately make screen black and show the video overlay
+                if (video) {
+                    video.style.display = 'block';
+                    video.style.opacity = '1';
+                    video.style.transition = '';
+                    try { video.currentTime = 0; } catch(e) {}
+                }
+
+                // Hide the login window (keep the reverse animation for effect)
+                try {
+                loginWindow.style.animation = 'evilAppear 0.5s reverse forwards';
+                setTimeout(() => { loginWindow.style.display = 'none'; }, 400);
+                } catch (e) {}
+
+                // Ensure desktop is hidden before video finishes
+                if (desktop) {
+                desktop.style.display = 'none';
+                desktop.style.opacity = '0';
+                desktop.style.transition = '';
+                }
+
+                // Try to play the video (user gesture from clicking OK should allow autoplay)
+                if (video) {
+                    const p = video.play();
+                    if (p && p.catch) p.catch(()=>{ /* ignore play errors */ });
+                }
+
+                // When video ends, fade the desktop in over 4 seconds
+                const finish = function() {
+                if (!desktop) {
+                    // if no desktop found, just remove video
+                    try { if (video) video.remove(); } catch(e) {}
+                    return;
+                }
+
+                // Show desktop but invisible, then transition opacity
+                desktop.style.display = 'block';
+                // Ensure we can animate opacity
+                desktop.style.opacity = '0';
+                // Force reflow
+                void desktop.offsetWidth;
+                desktop.style.transition = 'opacity 4s ease';
+                desktop.style.opacity = '1';
+
+                // After fade completes remove/hide the video overlay
+                setTimeout(() => {
+                    if (video) {
+                        // fade video out smoothly
+                        video.style.transition = 'opacity 0.8s ease';
+                        video.style.opacity = '0';
+                        setTimeout(() => {
+                        try { video.remove(); } catch(e) {}
+                        }, 900);
+                    }
+                }, 4000);
+                };
+
+                // Handle natural end and errors
+                if (video) {
+                    video.addEventListener('ended', finish, { once: true });
+                    video.addEventListener('error', function() {
+                    // fallback: reveal desktop immediately with fade
+                    finish();
+                    }, { once: true });
+
+                    // In case the video can't play or is blocked, set a timeout fallback (10s)
+                    const fallbackTimeout = setTimeout(() => {
+                    finish();
+                    }, 10000);
+
+                    // Clear fallback if video ends earlier
+                    video.addEventListener('ended', function(){ clearTimeout(fallbackTimeout); }, { once: true });
+                    video.addEventListener('error', function(){ clearTimeout(fallbackTimeout); }, { once: true });
+                } else {
+                    // no video element: just reveal desktop
+                    finish();
+                }
+            };
+            });
+        </script>
+        
+<!-- Text files on desktop -->
+<div class="text-file" style="top: 11px; left: 90px;" onclick="openTextFile('notes')">
+    <div class="text-file-icon">T</div>
+    <span>mandela</span>
+</div>
+
+<div class="text-file" style="top: 91px; left: 90px;" onclick="openTextFile('ideas')">
+    <div class="text-file-icon">T</div>
+    <span>ideas.txt</span>
+</div>
+
+<div class="text-file" style="top: 171px; left: 90px;" onclick="openTextFile('journal')">
+    <div class="text-file-icon">T</div>
+    <span>journal.txt</span>
+</div>
+
+<div class="text-file" style="top: 251px; left: 90px;" onclick="openTextFile('passwords')">
+    <div class="text-file-icon">T</div>
+    <span>passwords.txt</span>
+</div>
+
+<div class="text-file" style="top: 341px; left: 90px;" onclick="openTextFile('todo')">
+    <div class="text-file-icon">T</div>
+    <span>todo.txt</span>
+</div>
+
+
+    <!-- Taskbar -->
+    <div id="toolbar">
+        <button class="start-button" onclick="toggleStartMenu()">
+            <span>7</span>
+        </button>
+        <div class="toolbar-separator"></div>
+        <div class="toolbar-left">
+            <div class="toolbar-icon" onclick="openProfile('user1')">👤</div>
+            <div class="toolbar-icon" onclick="openTextFile('notes')">T</div>
+            <div class="toolbar-icon" onclick="openTextFile('ideas')">T</div>
+        </div>
+        <div class="toolbar-separator"></div>
+        <div class="toolbar-right">
+            <div class="volume-control">
+                <button id="mute-btn" class="volume-icon" aria-label="Mute" style="background:none;border:none;cursor:pointer;">🔊</button>
+                <input id="volume-slider" type="range" min="0" max="100" value="50" style="width: 80px;">
+            </div>
+            <div class="time" id="time">10:30 PM</div>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu">
+        <div class="start-menu-header">7 OS</div>
+        <div class="start-menu-item" onclick="openProfile('user1')">
+            <div class="icon-placeholder">👤</div>
+            <span>7FX8</span>
+        </div>
+        <div class="start-menu-item" onclick="openProfile('user2')">
+            <div class="icon-placeholder">👤</div>
+            <span>Taylor Reed</span>
+        </div>
+        <div class="start-menu-item" onclick="openProfile('user3')">
+            <div class="icon-placeholder">👤</div>
+            <span>Jordan Casey</span>
+        </div>
+        <div class="start-menu-separator"></div>
+        <div class="start-menu-item" onclick="openTextFile('notes')">
+            <div class="icon-placeholder">T</div>
+            <span>notes.txt</span>
+        </div>
+        <div class="start-menu-item" onclick="openTextFile('ideas')">
+            <div class="icon-placeholder">T</div>
+            <span>ideas.txt</span>
+        </div>
+        <div class="start-menu-separator"></div>
+        <div class="start-menu-item" onclick="document.getElementById('login-window').style.display='block'; document.getElementById('desktop').style.display='none'">
+            <div class="icon-placeholder">🚪</div>
+            <span>Log Off</span>
+        </div>
+    </div>
+
+    <!-- Window Templates -->
+    <div class="window" id="window-template" style="display: none;">
+        <div class="title-bar">
+            <div class="title-bar-text">Window Title</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow(this)">-</button>
+                <button aria-label="Maximize" onclick="toggleMaximize(this)">+</button>
+                <button aria-label="Close" onclick="closeWindow(this)">X</button>
+            </div>
+        </div>
+        <div class="window-body">
+            <p>Window content goes here.</p>
+        </div>
+    </div>
+
+    <script>
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('time').textContent = `${hours}:${minutes} ${ampm}`;
+        }
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // Start menu toggle
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // Close start menu when clicking elsewhere
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#start-menu') && !e.target.closest('.start-button')) {
+                document.getElementById('start-menu').style.display = 'none';
+            }
+        });
+        
+        // Close / Minimize / Maximize helpers
+        function closeWindow(btn) {
+            const winEl = btn.closest('.window');
+            if (!winEl) return;
+            winEl.style.animation = 'windowOpen 0.3s reverse forwards';
+            setTimeout(() => {
+                winEl.style.display = 'none';
+                winEl.style.animation = '';
+            }, 300);
+        }
+
+        function minimizeWindow(btn) {
+            const winEl = btn.closest('.window');
+            if (!winEl) return;
+            // Simply hide the window (a more advanced implementation could add a taskbar icon)
+            winEl.style.display = 'none';
+        }
+
+        function toggleMaximize(btn) {
+            const winEl = btn.closest('.window');
+            if (!winEl) return;
+
+            if (winEl.dataset.maximized === 'true') {
+                // restore
+                winEl.style.position = winEl.dataset.prevPosition || 'absolute';
+                winEl.style.left = winEl.dataset.prevLeft || '';
+                winEl.style.top = winEl.dataset.prevTop || '';
+                winEl.style.width = winEl.dataset.prevWidth || '';
+                winEl.style.height = winEl.dataset.prevHeight || '';
+                winEl.dataset.maximized = 'false';
+            } else {
+                // store previous geometry
+                const rect = winEl.getBoundingClientRect();
+                winEl.dataset.prevPosition = winEl.style.position || '';
+                winEl.dataset.prevLeft = winEl.style.left || rect.left + 'px';
+                winEl.dataset.prevTop = winEl.style.top || rect.top + 'px';
+                winEl.dataset.prevWidth = winEl.style.width || rect.width + 'px';
+                winEl.dataset.prevHeight = winEl.style.height || rect.height + 'px';
+
+                // maximize (respecting the taskbar height)
+                winEl.style.position = 'fixed';
+                winEl.style.left = '0';
+                winEl.style.top = '0';
+                winEl.style.width = '100%';
+                winEl.style.height = 'calc(100% - 40px)';
+                winEl.dataset.maximized = 'true';
+            }
+        }
+        
+        // Login function
+        function login() {
+            const loginWindow = document.getElementById('login-window');
+            loginWindow.style.animation = 'evilAppear 0.5s reverse forwards';
+            
+            setTimeout(() => {
+                loginWindow.style.display = 'none';
+                document.getElementById('desktop').style.display = 'block';
+
+                // Play login sound at 25% volume after desktop loads
+                setTimeout(() => {
+                    playLoginSound(0.25);
+                }, 400);
+
+                // Create floating text animation
+                const desktop = document.getElementById('desktop');
+                const welcomeText = document.createElement('div');
+                welcomeText.textContent = 'WELCOME TO 7 OS';
+                welcomeText.style.position = 'absolute';
+                welcomeText.style.color = '#0066ff';
+                welcomeText.style.fontSize = '24px';
+                welcomeText.style.fontWeight = 'bold';
+                welcomeText.style.textShadow = '0 0 10px rgba(0, 100, 255, 0.8)';
+                welcomeText.style.opacity = '0';
+                welcomeText.style.top = '50%';
+                welcomeText.style.left = '50%';
+                welcomeText.style.transform = 'translate(-50%, -50%)';
+                welcomeText.style.zIndex = '1000';
+                desktop.appendChild(welcomeText);
+
+                // Animate the welcome text
+                const keyframes = [
+                    { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' },
+                    { opacity: 1, transform: 'translate(-50%, -50%) scale(1.2)' },
+                    { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
+                    { opacity: 0, transform: 'translate(-50%, -50%) scale(1.5)' }
+                ];
+
+                welcomeText.animate(keyframes, {
+                    duration: 3000,
+                    easing: 'ease-out'
+                });
+
+                // Remove after animation
+                setTimeout(() => {
+                    desktop.removeChild(welcomeText);
+                }, 3000);
+            }, 500);
+        }
+        
+        // Open profile window
+        function openProfile(userId) {
+            // Close start menu if open
+            document.getElementById('start-menu').style.display = 'none';
+            
+            // Create a new window based on template
+            const template = document.getElementById('window-template');
+            const newWindow = template.cloneNode(true);
+            newWindow.id = 'profile-' + userId;
+            newWindow.style.display = 'block';
+            newWindow.style.left = (Math.random() * 200) + 'px';
+            newWindow.style.top = (Math.random() * 100) + 'px';
+            
+            // Set window title and content based on user
+            const titleBar = newWindow.querySelector('.title-bar-text');
+            const content = newWindow.querySelector('.window-body');
+            
+            const profiles = {
+                'user1': {
+                    name: '7FX8',
+                    title: 'Site Owner',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'Experienced developer with a passion for Hunting Pedophiles',
+                    skills: 'Super Swag Doxxer',
+                    projects: '7s Formatting Tool, 7 OS',
+                    contact: 'Telegram: @thou7fx8'
+                },
+                'user2': {
+                    name: 'UHXT',
+                    title: 'D1 Card seller',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'Loves to steal and sell cards on his little telegram',
+                    skills: 'Stealing everything and playing dahood all day',
+                    projects: 'His telegram carding channel....',
+                    contact: 'Telegram: @preachnn'
+                },
+                'user3': {
+                    name: 'Horrified',
+                    title: 'Cheat Developer',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'cheat making professional with over 50K spent on doordash',
+                    skills: 'Cheat Development, Reverse Engineering, C++, Python',
+                    projects: '#RR',
+                    contact: '@horified on tiktok | Cheat Server: https://discord.gg/DA2pthCuZ5'
+                },
+                'user4': {
+                    name: 'ACE',
+                    title: 'The group Retard',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'Not sure what to say...',
+                    skills: 'Extorting random egirls for esex',
+                    projects: 'Not a fucking clue',
+                    contact: 'Discord: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvii'
+                }
+            };
+            
+            const user = profiles[userId] || {
+                name: 'Unknown User',
+                title: 'No title',
+                details: 'No information available',
+                bio: 'No bio available',
+                skills: 'No skills listed',
+                projects: 'No projects listed'
+            };
+            
+            titleBar.textContent = `${user.name} - Profile`;
+            
+            content.innerHTML = `
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar">${user.name.charAt(0)}</div>
+                        <div class="profile-info">
+                            <div class="profile-name">${user.name}</div>
+                            <div class="profile-details">${user.title}</div>
+                            <div class="profile-details">${user.details.replace(/\n/g, '<br>')}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-content">
+                        <div class="profile-section">
+                            <div class="profile-section-title">Bio</div>
+                            <div>${user.bio}</div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <div class="profile-section-title">Skills</div>
+                            <div>${user.skills}</div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <div class="profile-section-title">Projects</div>
+                            <div>${user.projects}</div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <div class="profile-section-title">Contact</div>
+                            <div>${user.contact || 'No contact info available.'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(newWindow);
+            
+            // Make window draggable
+            makeDraggable(newWindow);
+        }
+        
+        // Open text file
+        function openTextFile(file) {
+            // Close start menu if open
+            document.getElementById('start-menu').style.display = 'none';
+            
+            // Create a new window based on template
+            const template = document.getElementById('window-template');
+            const newWindow = template.cloneNode(true);
+            newWindow.id = 'file-' + file;
+            newWindow.style.display = 'block';
+            
+            // Position window
+            const windows = document.querySelectorAll('.window');
+            newWindow.style.top = (100 + (windows.length * 20)) + 'px';
+            newWindow.style.left = (100 + (windows.length * 20)) + 'px';
+            
+            // Set window content based on file
+            const titleBar = newWindow.querySelector('.title-bar-text');
+            const windowBody = newWindow.querySelector('.window-body');
+            
+            switch(file) {
+                case 'notes':
+                    titleBar.textContent = 'mandela.txt';
+                    windowBody.innerHTML = `
+                        <div class="text-content">
+    The Mandela Effect - A Study in Collective False Memory
+    
+    Subject: Berenstain Bears
+    Many remember "Berenstein" but it has always been "Berenstain"
+    
+    Subject: Star Wars
+    "No, I am your father" is often misquoted as "Luke, I am your father"
+    
+    Subject: Monopoly Man
+    Many recall a monocle, but he never had one
+    
+    Subject: Curious George
+    No tail, despite many remembering one
+    
+    Subject: Fruit of the Loom
+    No cornucopia in logo, despite widespread memory of it
+    
+    These discrepancies suggest that memories are not perfect recordings but reconstructions influenced by suggestion and social reinforcement.
+                        </div>
+                    `;
+                    break;
+                    
+                case 'ideas':
+                    titleBar.textContent = 'ideas.txt';
+                    windowBody.innerHTML = `
+                        <div class="text-content">
+    Project Ideas:
+    
+    1. Create an app that tracks Mandela Effect instances
+    2. Develop a VR experience of alternate memories
+    3. Write a novel about memory manipulation
+    4. Build a website documenting personal Mandela Effects
+    5. Create a game where the world changes subtly each playthrough
+    
+    Need to research more about:
+    - How false memories form
+    - Social reinforcement of memories
+    - Neurological basis for the Mandela Effect
+    - Historical examples of collective false memory
+                        </div>
+                    `;
+                    break;
+                    
+                case 'journal':
+                    titleBar.textContent = 'journal.txt';
+                    windowBody.innerHTML = `
+                        <div class="text-content">
+    Personal Journal - DO NOT READ
+    
+    October 12: 
+    Today I noticed something strange. I could have sworn the book series was called "Berenstein Bears" but when I checked my childhood books, it's clearly "Berenstain". How could I have misremembered that?
+    
+    October 15:
+    Talked to Sarah about it. She remembers "Berenstein" too. We checked online and found out about the Mandela Effect. Apparently many people remember Nelson Mandela dying in prison in the 80s, but he actually died in 2013.
+    
+    October 20:
+    This is getting weird. The Fruit of the Loom logo never had a cornucopia? I distinctly remember drawing it in art class. What is happening to my memories?
+    
+    October 25:
+    I found others online who remember things differently. There are whole communities dedicated to this phenomenon. Some think it's parallel universes, others say it's memory manipulation.
+    
+    November 3:
+    I don't feel like myself anymore. How can I trust my own memories? What else have I misremembered?
+                        </div>
+                    `;
+                    break;
+                    
+                case 'passwords':
+                    titleBar.textContent = 'passwords.txt';
+                    windowBody.innerHTML = `
+                        <div class="text-content">
+    IMPORTANT: Keep this file secure!
+    
+    Bank: 
+    Username: jsmith72
+    Password: M@ndel@1980
+    
+    Email:
+    Username: j.smith@mail.com
+    Password: F@lseM3mory
+    
+    Social Media:
+    Username: memory_researcher
+    Password: B3renst3in
+    
+    Work:
+    Username: jsmith
+                        </div>
+                    `;
+                    break;
+
+                default:
+                    titleBar.textContent = file + '.txt';
+                    windowBody.innerHTML = `<div class="text-content">No content available.</div>`;
+                    break;
+            }
+
+            // append and enable dragging
+            document.body.appendChild(newWindow);
+            makeDraggable(newWindow);
+        }
+
+        // Make windows draggable
+        function makeDraggable(element) {
+            const titleBar = element.querySelector('.title-bar');
+            if (!titleBar) return;
+            
+            // Ensure the window uses left/top positioning (not transform) for dragging
+            element.style.left = element.style.left || element.getBoundingClientRect().left + 'px';
+            element.style.top = element.style.top || element.getBoundingClientRect().top + 'px';
+            element.style.position = element.style.position || 'absolute';
+            
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let startLeft = 0;
+            let startTop = 0;
+            
+            // prefer pointer events for mouse/touch/pen support
+            titleBar.addEventListener('pointerdown', dragStart);
+            document.addEventListener('pointerup', dragEnd);
+            document.addEventListener('pointermove', drag);
+            
+            function dragStart(e) {
+                // only start drag when clicking the title bar itself, not controls (min/max/close)
+                if (!(e.target === titleBar || titleBar.contains(e.target))) return;
+                if (e.target.closest && e.target.closest('.title-bar-controls')) {
+                    // allow clicks on controls to proceed (don't start dragging)
+                    return;
+                }
+                // start dragging
+                e.preventDefault();
+                
+                isDragging = true;
+                
+                // starting pointer positions
+                startX = e.clientX;
+                startY = e.clientY;
+                
+                // parse current left/top, fallback to bounding rect
+                const computed = window.getComputedStyle(element);
+                startLeft = parseFloat(computed.left) || element.getBoundingClientRect().left;
+                startTop = parseFloat(computed.top) || element.getBoundingClientRect().top;
+                
+                // remove inline transform to avoid conflicts with CSS animations
+                if (element.style.transform && element.style.transform !== 'none') {
+                    element.style.transform = 'none';
+                }
+                
+                // Bring to front
+                document.querySelectorAll('.window').forEach(win => {
+                    win.style.zIndex = '100';
+                });
+                element.style.zIndex = '1000';
+                
+                // capture pointer if supported
+                try { titleBar.setPointerCapture && titleBar.setPointerCapture(e.pointerId); } catch (err) {}
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                
+                element.style.left = (startLeft + dx) + 'px';
+                element.style.top = (startTop + dy) + 'px';
+            }
+            
+            function dragEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                try { titleBar.releasePointerCapture && titleBar.releasePointerCapture(e.pointerId); } catch (err) {}
+            }
+        }
+        
+        // Close login window when clicking outside (with a small delay to avoid immediate close)
+        setTimeout(() => {
+            document.addEventListener('click', function(e) {
+                const loginWindow = document.getElementById('login-window');
+                if (loginWindow.style.display === 'block' && !e.target.closest('.window')) {
+                    playLoginSound();
+                }
+            });
+        }, 1000);
+    </script>
+</body>
+</html>
