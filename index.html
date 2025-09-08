@@ -1414,222 +1414,9 @@ document.addEventListener('touchstart', initAudio, { once: true });
         }
         
         // Open profile window
-        (function installIntroGuard(){
-            if (window.__introGuardInstalled) return;
-            // shared state to prevent overlapping or repeated intro playback
-            (function installIntroGuard(){
-                if (window.__introGuardInstalled) return;
-
-                // Ensure the intro MP4 video stays muted and cannot produce audible output
-                function ensureIntroVideoMuted() {
-                    try {
-                        const v = document.getElementById('intro-video');
-                        if (!v) return;
-                        // Force muted + zero volume and persistent attribute
-                        v.muted = true;
-                        v.volume = 0;
-                        v.setAttribute('muted', '');
-
-                        // If any other script tries to unmute on gesture, re-assert mute on relevant events
-                        const reMute = () => {
-                            try { v.muted = true; v.volume = 0; v.setAttribute('muted', ''); } catch(e) {}
-                        };
-                        v.addEventListener('play', reMute, { capture: true });
-                        v.addEventListener('volumechange', reMute, { capture: true });
-                        // Also observe attribute changes just in case another script toggles 'muted'
-                        if (window.MutationObserver) {
-                            const mo = new MutationObserver(reMute);
-                            mo.observe(v, { attributes: true, attributeFilter: ['muted', 'volume', 'src'] });
-                        }
-                    } catch (e) {
-                        console.warn('ensureIntroVideoMuted failed', e);
-                    }
-                }
-
-                // Try to mute immediately and after DOM is ready
-                ensureIntroVideoMuted();
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', ensureIntroVideoMuted, { once: true });
-                } else {
-                    // already ready
-                    ensureIntroVideoMuted();
-                }
-
-                window.__introState = window.__introState || {
-                    playing: false,
-                    played: false,
-                    promise: null,
-                    resolve: null,
-                    audio: null
-                };
-
-                function getOrCreateIntroAudio(volume) {
-                    // reuse existing element if present
-                    let audio = window.__introState.audio || document.getElementById('intro-sound');
-                    if (!audio) {
-                        audio = document.createElement('audio');
-                        audio.id = 'intro-sound';
-                        audio.src = 'intro.mp3';
-                        audio.preload = 'auto';
-                        audio.style.display = 'none';
-                        document.body.appendChild(audio);
-                    }
-                    window.__introState.audio = audio;
-                    if (typeof volume === 'number') {
-                        try { audio.volume = Math.max(0, Math.min(1, volume)); } catch(e){}
-                    }
-                    return audio;
-                }
-
-                // pause any other intro audio elements to avoid duplicates (robust for GH pages)
-                function silenceOtherIntroElements(ourAudio) {
-                    try {
-                        const audios = document.querySelectorAll('audio');
-                        audios.forEach(a => {
-                            if (a === ourAudio) return;
-                            const src = (a.src || '').split('?')[0];
-                            if (!src) return;
-                            // compare filename only to be tolerant of absolute/relative paths
-                            const name = src.split('/').pop().toLowerCase();
-                            if (name === 'intro.mp3' || a.id === 'intro-sound') {
-                                try {
-                                    a.pause();
-                                    a.currentTime = 0;
-                                } catch(e){}
-                            }
-                        });
-                    } catch(e){}
-                }
-
-                // Robust single-play wrapper returning a Promise.
-                // Subsequent calls while playing return the same Promise.
-                window.playIntroSound = function(volume) {
-                    const state = window.__introState;
-
-                    // If already played once, do not play again
-                    if (state.played) {
-                        return Promise.resolve();
-                    }
-
-                    // If currently playing, return the existing promise
-                    if (state.playing && state.promise) {
-                        return state.promise;
-                    }
-
-                    state.playing = true;
-                    state.promise = new Promise((resolve) => {
-                        const audio = getOrCreateIntroAudio(volume);
-
-                        // Ensure we start from the beginning
-                        try { audio.currentTime = 0; } catch(e) {}
-
-                        // make sure any stray duplicates are silenced
-                        silenceOtherIntroElements(audio);
-
-                        function cleanupAndResolve() {
-                            state.playing = false;
-                            state.played = true;
-                            audio.removeEventListener('ended', onEnded);
-                            audio.removeEventListener('error', onError);
-                            state.promise = null;
-                            state.resolve = null;
-                            resolve();
-                        }
-
-                        function onEnded() {
-                            cleanupAndResolve();
-                        }
-                        function onError() {
-                            // treat errors as completion to avoid stuck state
-                            cleanupAndResolve();
-                        }
-
-                        // Remove any previous listeners then add once-only listeners
-                        audio.removeEventListener('ended', onEnded);
-                        audio.removeEventListener('error', onError);
-                        audio.addEventListener('ended', onEnded, { once: true });
-                        audio.addEventListener('error', onError, { once: true });
-
-                        // Try to play; browsers may reject without gesture, handle rejection gracefully
-                        const playPromise = audio.play();
-                        if (playPromise && playPromise.catch) {
-                            playPromise.catch((err) => {
-                                // If play rejected, still clear playing flag so caller can retry later
-                                console.warn('intro audio play rejected:', err);
-                                setTimeout(() => {
-                                    state.playing = false;
-                                    state.promise = null;
-                                    resolve();
-                                }, 50);
-                            });
-                        }
-
-                        // expose resolver for external use if needed
-                        state.resolve = resolve;
-                    });
-
-                    return state.promise;
-                };
-
-                // expose a reset helper (useful for debugging or forced replay)
-                window.resetIntroSoundState = function() {
-                    const state = window.__introState || {};
-                    state.playing = false;
-                    state.played = false;
-                    state.promise = null;
-                    state.resolve = null;
-                    // do not remove the audio element (keeps reuse)
-                };
-
-                // Ensure the login OK button uses this guarded playback (replaces inline onclick)
-                document.addEventListener('DOMContentLoaded', function () {
-                    try {
-                        // Re-assert video mute in case other scripts changed it during load
-                        ensureIntroVideoMuted();
-
-                        const okBtn = document.querySelector('#login-window .window-actions .btn');
-                        if (okBtn) {
-                            // remove any inline onclick to avoid duplicate handlers
-                            try { okBtn.removeAttribute('onclick'); } catch(e){}
-
-                            okBtn.addEventListener('click', function (e) {
-                                // Prevent default form submit or other inline actions
-                                e.preventDefault();
-
-                                // If already played once, skip playing and proceed with login
-                                if (window.__introState && window.__introState.played) {
-                                    // still call login as expected
-                                    setTimeout(() => { if (typeof login === 'function') login(); }, 300);
-                                    return;
-                                }
-
-                                // Ensure the MP4 has no audio right before playing (defensive)
-                                try { 
-                                    const v = document.getElementById('intro-video');
-                                    if (v) { v.muted = true; v.volume = 0; v.setAttribute('muted',''); }
-                                } catch (err) {}
-
-                                // Play intro via guarded function (won't allow duplicates)
-                                try {
-                                    window.playIntroSound(0.5);
-                                } catch (err) {
-                                    console.warn('playIntroSound failed:', err);
-                                }
-
-                                // proceed to login after the usual small delay
-                                setTimeout(() => { if (typeof login === 'function') login(); }, 300);
-                            }, { passive: true });
-                        }
-                    } catch (e) {}
-                });
-
-                window.__introGuardInstalled = true;
-            })();
-
         function openProfile(userId) {
             // Close start menu if open
-            const sm = document.getElementById('start-menu');
-            if (sm) sm.style.display = 'none';
+            document.getElementById('start-menu').style.display = 'none';
             
             // Create a new window based on template
             const template = document.getElementById('window-template');
@@ -1644,89 +1431,88 @@ document.addEventListener('touchstart', initAudio, { once: true });
             const content = newWindow.querySelector('.window-body');
             
             const profiles = {
-            'user1': {
-                name: '7FX8',
-                title: 'Site Owner',
-                details: 'Joined: September 2025\nStatus: Active',
-                bio: 'Experienced developer and community moderator.',
-                skills: 'Web development, tooling',
-                projects: '7s Formatting Tool, 7 OS',
-                contact: 'Contact: @7fx8 (placeholder)'
-            },
-            'user2': {
-                name: 'UHXT',
-                title: 'Vendor',
-                details: 'Joined: September 2025\nStatus: Active',
-                bio: 'Collector and small-scale seller of digital goods.',
-                skills: 'E-commerce, logistics',
-                projects: 'Marketplace projects',
-                contact: 'Contact: @uhxt (placeholder)'
-            },
-            'user3': {
-                name: 'Horrified',
-                title: 'Developer',
-                details: 'Joined: September 2025\nStatus: Active',
-                bio: 'Software engineer with an interest in reverse engineering and tooling.',
-                skills: 'C++, Python, tooling',
-                projects: 'Various open-source utilities',
-                contact: 'Contact: @horrified (placeholder)'
-            },
-            'user4': {
-                name: 'ACE',
-                title: 'Community Member',
-                details: 'Joined: September 2025\nStatus: Active',
-                bio: 'Active participant in community projects.',
-                skills: 'Collaboration, testing',
-                projects: 'Community moderation and support',
-                contact: 'Contact: ACE (placeholder)'
-            }
+                'user1': {
+                    name: '7FX8',
+                    title: 'Site Owner',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'Experienced developer with a passion for Hunting Pedophiles',
+                    skills: 'Super Swag Doxxer',
+                    projects: '7s Formatting Tool, 7 OS',
+                    contact: 'Telegram: @thou7fx8'
+                },
+                'user2': {
+                    name: 'UHXT',
+                    title: 'D1 Card seller',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'Loves to steal and sell cards on his little telegram',
+                    skills: 'Stealing everything and playing dahood all day',
+                    projects: 'His telegram carding channel....',
+                    contact: 'Telegram: @preachnn'
+                },
+                'user3': {
+                    name: 'Horrified',
+                    title: 'Cheat Developer',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'cheat making professional with over 50K spent on doordash',
+                    skills: 'Cheat Development, Reverse Engineering, C++, Python',
+                    projects: '#RR',
+                    contact: '@horified on tiktok | Cheat Server: https://discord.gg/DA2pthCuZ5'
+                },
+                'user4': {
+                    name: 'ACE',
+                    title: 'The group Retard',
+                    details: 'Joined: September 2025\nStatus: Active',
+                    bio: 'Not sure what to say...',
+                    skills: 'Extorting random egirls for esex',
+                    projects: 'Not a fucking clue',
+                    contact: 'Discord: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvii'
+                }
             };
             
             const user = profiles[userId] || {
-            name: 'Unknown User',
-            title: 'No title',
-            details: 'No information available',
-            bio: 'No bio available',
-            skills: 'No skills listed',
-            projects: 'No projects listed',
-            contact: 'No contact info'
+                name: 'Unknown User',
+                title: 'No title',
+                details: 'No information available',
+                bio: 'No bio available',
+                skills: 'No skills listed',
+                projects: 'No projects listed'
             };
             
             titleBar.textContent = `${user.name} - Profile`;
             
             content.innerHTML = `
-            <div class="profile-container">
-                <div class="profile-header">
-                <div class="profile-avatar">${(user.name && user.name.charAt(0)) || 'U'}</div>
-                <div class="profile-info">
-                    <div class="profile-name">${user.name}</div>
-                    <div class="profile-details">${user.title}</div>
-                    <div class="profile-details">${(user.details || '').replace(/\n/g, '<br>')}</div>
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar">${user.name.charAt(0)}</div>
+                        <div class="profile-info">
+                            <div class="profile-name">${user.name}</div>
+                            <div class="profile-details">${user.title}</div>
+                            <div class="profile-details">${user.details.replace(/\n/g, '<br>')}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-content">
+                        <div class="profile-section">
+                            <div class="profile-section-title">Bio</div>
+                            <div>${user.bio}</div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <div class="profile-section-title">Skills</div>
+                            <div>${user.skills}</div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <div class="profile-section-title">Projects</div>
+                            <div>${user.projects}</div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <div class="profile-section-title">Contact</div>
+                            <div>${user.contact || 'No contact info available.'}</div>
+                        </div>
+                    </div>
                 </div>
-                </div>
-                
-                <div class="profile-content">
-                <div class="profile-section">
-                    <div class="profile-section-title">Bio</div>
-                    <div>${user.bio}</div>
-                </div>
-                
-                <div class="profile-section">
-                    <div class="profile-section-title">Skills</div>
-                    <div>${user.skills}</div>
-                </div>
-                
-                <div class="profile-section">
-                    <div class="profile-section-title">Projects</div>
-                    <div>${user.projects}</div>
-                </div>
-                
-                <div class="profile-section">
-                    <div class="profile-section-title">Contact</div>
-                    <div>${user.contact || 'No contact info available.'}</div>
-                </div>
-                </div>
-            </div>
             `;
             
             document.body.appendChild(newWindow);
