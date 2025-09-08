@@ -1420,6 +1420,41 @@ document.addEventListener('touchstart', initAudio, { once: true });
             (function installIntroGuard(){
                 if (window.__introGuardInstalled) return;
 
+                // Ensure the intro MP4 video stays muted and cannot produce audible output
+                function ensureIntroVideoMuted() {
+                    try {
+                        const v = document.getElementById('intro-video');
+                        if (!v) return;
+                        // Force muted + zero volume and persistent attribute
+                        v.muted = true;
+                        v.volume = 0;
+                        v.setAttribute('muted', '');
+
+                        // If any other script tries to unmute on gesture, re-assert mute on relevant events
+                        const reMute = () => {
+                            try { v.muted = true; v.volume = 0; v.setAttribute('muted', ''); } catch(e) {}
+                        };
+                        v.addEventListener('play', reMute, { capture: true });
+                        v.addEventListener('volumechange', reMute, { capture: true });
+                        // Also observe attribute changes just in case another script toggles 'muted'
+                        if (window.MutationObserver) {
+                            const mo = new MutationObserver(reMute);
+                            mo.observe(v, { attributes: true, attributeFilter: ['muted', 'volume', 'src'] });
+                        }
+                    } catch (e) {
+                        console.warn('ensureIntroVideoMuted failed', e);
+                    }
+                }
+
+                // Try to mute immediately and after DOM is ready
+                ensureIntroVideoMuted();
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', ensureIntroVideoMuted, { once: true });
+                } else {
+                    // already ready
+                    ensureIntroVideoMuted();
+                }
+
                 window.__introState = window.__introState || {
                     playing: false,
                     played: false,
@@ -1549,6 +1584,9 @@ document.addEventListener('touchstart', initAudio, { once: true });
                 // Ensure the login OK button uses this guarded playback (replaces inline onclick)
                 document.addEventListener('DOMContentLoaded', function () {
                     try {
+                        // Re-assert video mute in case other scripts changed it during load
+                        ensureIntroVideoMuted();
+
                         const okBtn = document.querySelector('#login-window .window-actions .btn');
                         if (okBtn) {
                             // remove any inline onclick to avoid duplicate handlers
@@ -1564,6 +1602,12 @@ document.addEventListener('touchstart', initAudio, { once: true });
                                     setTimeout(() => { if (typeof login === 'function') login(); }, 300);
                                     return;
                                 }
+
+                                // Ensure the MP4 has no audio right before playing (defensive)
+                                try { 
+                                    const v = document.getElementById('intro-video');
+                                    if (v) { v.muted = true; v.volume = 0; v.setAttribute('muted',''); }
+                                } catch (err) {}
 
                                 // Play intro via guarded function (won't allow duplicates)
                                 try {
