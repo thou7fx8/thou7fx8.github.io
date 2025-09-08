@@ -1414,9 +1414,63 @@ document.addEventListener('touchstart', initAudio, { once: true });
         }
         
         // Open profile window
+        (function installIntroGuard(){
+            if (window.__introGuardInstalled) return;
+            const originalPlayIntro = window.playIntroSound || function(){};
+            let introPlaying = false;
+            let introPlayed = false;
+
+            window.playIntroSound = function(volume){
+                // prevent overlapping or multiple plays; allow a single play only
+                if (introPlaying || introPlayed) return;
+                introPlaying = true;
+
+                // Call original implementation (it creates/uses #intro-sound)
+                const result = originalPlayIntro(volume);
+
+                // Hook the audio element to mark when playback ends
+                const audio = document.getElementById('intro-sound');
+                if (audio) {
+                    // ensure start at 0
+                    try { audio.currentTime = 0; } catch(e){}
+                    // set volume if provided
+                    if (typeof volume === 'number') try { audio.volume = volume; } catch(e){}
+                    const onEnd = function(){
+                        introPlaying = false;
+                        introPlayed = true;
+                        audio.removeEventListener('ended', onEnd);
+                    };
+                    audio.addEventListener('ended', onEnd, { once: true });
+                } else {
+                    // watch for the element if it will be created by originalPlayIntro
+                    const watcher = setInterval(() => {
+                        const a = document.getElementById('intro-sound');
+                        if (a) {
+                            clearInterval(watcher);
+                            a.addEventListener('ended', function(){
+                                introPlaying = false;
+                                introPlayed = true;
+                            }, { once: true });
+                        }
+                    }, 200);
+
+                    // Safety timeout: if nothing appears after 60s, clear playing flag
+                    setTimeout(() => {
+                        clearInterval(watcher);
+                        if (!introPlayed) introPlaying = false;
+                    }, 60000);
+                }
+
+                return result;
+            };
+
+            window.__introGuardInstalled = true;
+        })();
+
         function openProfile(userId) {
             // Close start menu if open
-            document.getElementById('start-menu').style.display = 'none';
+            const sm = document.getElementById('start-menu');
+            if (sm) sm.style.display = 'none';
             
             // Create a new window based on template
             const template = document.getElementById('window-template');
@@ -1435,37 +1489,37 @@ document.addEventListener('touchstart', initAudio, { once: true });
                     name: '7FX8',
                     title: 'Site Owner',
                     details: 'Joined: September 2025\nStatus: Active',
-                    bio: 'Experienced developer with a passion for Hunting Pedophiles',
-                    skills: 'Super Swag Doxxer',
+                    bio: 'Experienced developer and community moderator.',
+                    skills: 'Web development, tooling',
                     projects: '7s Formatting Tool, 7 OS',
-                    contact: 'Telegram: @thou7fx8'
+                    contact: 'Contact: @7fx8 (placeholder)'
                 },
                 'user2': {
                     name: 'UHXT',
-                    title: 'D1 Card seller',
+                    title: 'Vendor',
                     details: 'Joined: September 2025\nStatus: Active',
-                    bio: 'Loves to steal and sell cards on his little telegram',
-                    skills: 'Stealing everything and playing dahood all day',
-                    projects: 'His telegram carding channel....',
-                    contact: 'Telegram: @preachnn'
+                    bio: 'Collector and small-scale seller of digital goods.',
+                    skills: 'E-commerce, logistics',
+                    projects: 'Marketplace projects',
+                    contact: 'Contact: @uhxt (placeholder)'
                 },
                 'user3': {
                     name: 'Horrified',
-                    title: 'Cheat Developer',
+                    title: 'Developer',
                     details: 'Joined: September 2025\nStatus: Active',
-                    bio: 'cheat making professional with over 50K spent on doordash',
-                    skills: 'Cheat Development, Reverse Engineering, C++, Python',
-                    projects: '#RR',
-                    contact: '@horified on tiktok | Cheat Server: https://discord.gg/DA2pthCuZ5'
+                    bio: 'Software engineer with an interest in reverse engineering and tooling.',
+                    skills: 'C++, Python, tooling',
+                    projects: 'Various open-source utilities',
+                    contact: 'Contact: @horrified (placeholder)'
                 },
                 'user4': {
                     name: 'ACE',
-                    title: 'The group Retard',
+                    title: 'Community Member',
                     details: 'Joined: September 2025\nStatus: Active',
-                    bio: 'Not sure what to say...',
-                    skills: 'Extorting random egirls for esex',
-                    projects: 'Not a fucking clue',
-                    contact: 'Discord: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvii'
+                    bio: 'Active participant in community projects.',
+                    skills: 'Collaboration, testing',
+                    projects: 'Community moderation and support',
+                    contact: 'Contact: ACE (placeholder)'
                 }
             };
             
@@ -1475,7 +1529,8 @@ document.addEventListener('touchstart', initAudio, { once: true });
                 details: 'No information available',
                 bio: 'No bio available',
                 skills: 'No skills listed',
-                projects: 'No projects listed'
+                projects: 'No projects listed',
+                contact: 'No contact info'
             };
             
             titleBar.textContent = `${user.name} - Profile`;
@@ -1483,11 +1538,11 @@ document.addEventListener('touchstart', initAudio, { once: true });
             content.innerHTML = `
                 <div class="profile-container">
                     <div class="profile-header">
-                        <div class="profile-avatar">${user.name.charAt(0)}</div>
+                        <div class="profile-avatar">${(user.name && user.name.charAt(0)) || 'U'}</div>
                         <div class="profile-info">
                             <div class="profile-name">${user.name}</div>
                             <div class="profile-details">${user.title}</div>
-                            <div class="profile-details">${user.details.replace(/\n/g, '<br>')}</div>
+                            <div class="profile-details">${(user.details || '').replace(/\n/g, '<br>')}</div>
                         </div>
                     </div>
                     
