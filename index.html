@@ -8,11 +8,21 @@
     <meta name="theme-color" content="#000000">
     
     <style>
+        /* Hide scrollbars while maintaining scroll functionality */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'MS Sans Serif', Arial, sans-serif;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        /* Hide webkit scrollbars */
+        *::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
         }
         
         body {
@@ -32,6 +42,8 @@
             height: calc(100% - 40px);
             background: #000000 url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjMTExMTExIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiMwODA4MDgiIGZpbGw9Im5vbmUiPjwvcGF0aD4KPC9zdmc+');
             overflow: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
         
         /* Animated desktop background */
@@ -384,6 +396,12 @@
             color: #cccccc;
             position: relative;
             z-index: 1;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        .window-body::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
         
         /* Enhanced animations */
@@ -637,6 +655,12 @@
             max-height: 300px;
             overflow: auto;
             color: #cccccc;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        .text-content::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
         
         /* Start menu */
@@ -958,7 +982,7 @@ document.addEventListener('touchstart', initAudio, { once: true });
             </div>
             <div class="desktop-icon" onclick="openHtmlTool()" style="top: 0px; left: 360px; position: absolute;">
                 <div class="icon-placeholder" style="background: linear-gradient(135deg, #ffcc00, #ff6600); color: #222;">&lt;/&gt;</div>
-                <span>HTML Tool</span>
+                <span>7's Dox Formatter</span>
             </div>
             <div class="text-file" style="top: 0px; left: 450px; position: absolute;" onclick="openTextFile('notes')">
                 <div class="text-file-icon">T</div>
@@ -1220,7 +1244,7 @@ document.addEventListener('touchstart', initAudio, { once: true });
         </div>
         <div class="desktop-icon" onclick="openHtmlTool()" style="top: 0px; left: 360px; position: absolute;">
             <div class="icon-placeholder" style="background: linear-gradient(135deg, #ffcc00, #ff6600); color: #222;">&lt;/&gt;</div>
-            <span>HTML Tool</span>
+            <span>7's Dox Formatter</span>
         </div>
         <div class="text-file" style="top: 0px; left: 450px; position: absolute;" onclick="openTextFile('notes')">
             <div class="text-file-icon">T</div>
@@ -1283,7 +1307,7 @@ document.addEventListener('touchstart', initAudio, { once: true });
         </div>
         <div class="start-menu-item" onclick="openHtmlTool()">
             <div class="icon-placeholder" style="background: linear-gradient(135deg, #ffcc00, #ff6600); color: #222;">&lt;/&gt;</div>
-            <span>Format Tool</span>
+            <span>7's Dox Formatter</span>
         </div>
         <div class="start-menu-separator"></div>
         <div class="start-menu-item" onclick="document.getElementById('login-window').style.display='block'; document.getElementById('desktop').style.display='none'">
@@ -1543,7 +1567,7 @@ document.addEventListener('touchstart', initAudio, { once: true });
             makeDraggable(newWindow);
         }
         
-        // Open HTML Tool window that loads Format Tool.html in a fake window
+        // Open 7's Dox Formatter window that loads Format Tool.html in a fake window
         function openHtmlTool() {
             // Close start menu if open
             document.getElementById('start-menu').style.display = 'none';
@@ -1563,12 +1587,12 @@ document.addEventListener('touchstart', initAudio, { once: true });
             
             // Set window title and content
             const titleBar = newWindow.querySelector('.title-bar-text');
-            titleBar.textContent = 'Format Tool';
+            titleBar.textContent = '7\'s Dox Formatter';
             
             // Create an iframe to load Format Tool.html
             const windowBody = newWindow.querySelector('.window-body');
             windowBody.innerHTML = `
-                <iframe src="Format Tool.html" style="width: 100%; height: 100%; border: none;"></iframe>
+                <iframe src="Format Tool.html" style="width: 100%; height: 100%; border: none; overflow: hidden;"></iframe>
             `;
             
             document.body.appendChild(newWindow);
