@@ -931,7 +931,7 @@ document.addEventListener('touchstart', initAudio, { once: true });
         </div>
         <div class="window-actions">
             <!-- Call playLoginSound first (user gesture) then proceed with login() -->
-            <button class="btn" onclick="playIntroSound(0.5); setTimeout(() => login(), 300)">OK</button>
+            <button class="btn" onclick="window.__waitForLogin=false; playIntroSound(0.5); setTimeout(() => login(), 300)">OK</button>
             <button class="btn" type="reset" form="login">Cancel</button>
         </div>
     </div>
@@ -940,31 +940,33 @@ document.addEventListener('touchstart', initAudio, { once: true });
     <!-- Desktop -->
     <div id="desktop" style="display: none;">
         <div class="desktop-icons">
-            <div class="desktop-icon" onclick="openProfile('user1')">
-            <div class="icon-placeholder">👤</div>
-            <span>7FX8</span>
+            <div class="desktop-icon" onclick="openProfile('user1')" style="top: 0px; left: 0px; position: absolute;">
+                <div class="icon-placeholder">👤</div>
+                <span>7FX8</span>
             </div>
-            <div class="desktop-icon" onclick="openProfile('user2')">
-            <div class="icon-placeholder">👤</div>
-            <span>UHXT</span>
+            <div class="desktop-icon" onclick="openProfile('user2')" style="top: 0px; left: 90px; position: absolute;">
+                <div class="icon-placeholder">👤</div>
+                <span>UHXT</span>
             </div>
-            <div class="desktop-icon" onclick="openProfile('user3')">
-            <div class="icon-placeholder">👤</div>
-            <span>Horrified</span>
+            <div class="desktop-icon" onclick="openProfile('user3')" style="top: 0px; left: 180px; position: absolute;">
+                <div class="icon-placeholder">👤</div>
+                <span>Horrified</span>
             </div>
-            <div class="desktop-icon" onclick="openProfile('user4')">
-            <div class="icon-placeholder">👤</div>
-            <script>
-                // Point the existing <audio id="login-sound"> to the local file in the same folder
-                (function(){
-                const audio = document.getElementById('login-sound');
-                if (!audio) return;
-                audio.src = 'login-sound.mp3';
-                audio.preload = 'auto';
-                try { audio.load(); } catch(e) {}
-                })();
-            </script>
-            <span>Ace</span>
+            <div class="desktop-icon" onclick="openProfile('user4')" style="top: 0px; left: 270px; position: absolute;">
+                <div class="icon-placeholder">👤</div>
+                <span>Ace</span>
+            </div>
+            <div class="desktop-icon" onclick="openHtmlTool()" style="top: 0px; left: 360px; position: absolute;">
+                <div class="icon-placeholder" style="background: linear-gradient(135deg, #ffcc00, #ff6600); color: #222;">&lt;/&gt;</div>
+                <span>HTML Tool</span>
+            </div>
+            <div class="text-file" style="top: 0px; left: 450px; position: absolute;" onclick="openTextFile('notes')">
+                <div class="text-file-icon">T</div>
+                <span>mandela</span>
+            </div>
+            <div class="text-file" style="top: 0px; left: 540px; position: absolute;" onclick="openTextFile('ideas')">
+                <div class="text-file-icon">T</div>
+                <span>ideas.txt</span>
             </div>
         </div>
         <!-- Ensure intro video audio is allowed and desktop reveal is idempotent -->
@@ -1077,15 +1079,21 @@ document.addEventListener('touchstart', initAudio, { once: true });
 
             // Robust handlers: ended, error and stalled -> reveal desktop immediately
             video.addEventListener('ended', function() {
+                if (window.__waitForLogin) return;
                 playLoginSound(0.0, 3000); // Start at 0% volume, fade to slider value over 3s
                 revealDesktopImmediate();
             }, { once: true });
-            video.addEventListener('error', revealDesktopImmediate, { once: true });
-            video.addEventListener('stalled', revealDesktopImmediate, { once: true });
+            video.addEventListener('error', function() {
+                if (window.__waitForLogin) return;
+                revealDesktopImmediate();
+            }, { once: true });
+            video.addEventListener('stalled', function() {
+                if (window.__waitForLogin) return;
+                revealDesktopImmediate();
+            }, { once: true });
 
             // Fallback: if the video does not start playing within 12s, reveal the desktop
-            const fallback = setTimeout(() => revealDesktopImmediate(), 12000);
-            video.addEventListener('play', () => clearTimeout(fallback), { once: true });
+            // Removed fallback auto-reveal
         });
         </script>
         <!-- Intro video element (created here so it's available when login() is overridden) -->
@@ -1191,32 +1199,41 @@ document.addEventListener('touchstart', initAudio, { once: true });
             });
         </script>
         
-<!-- Text files on desktop -->
-<div class="text-file" style="top: 11px; left: 90px;" onclick="openTextFile('notes')">
-    <div class="text-file-icon">T</div>
-    <span>mandela</span>
+<!-- Desktop -->
+<div id="desktop" style="display: none;">
+    <div class="desktop-icons">
+        <div class="desktop-icon" onclick="openProfile('user1')" style="top: 0px; left: 0px; position: absolute;">
+            <div class="icon-placeholder">👤</div>
+            <span>7FX8</span>
+        </div>
+        <div class="desktop-icon" onclick="openProfile('user2')" style="top: 0px; left: 90px; position: absolute;">
+            <div class="icon-placeholder">👤</div>
+            <span>UHXT</span>
+        </div>
+        <div class="desktop-icon" onclick="openProfile('user3')" style="top: 0px; left: 180px; position: absolute;">
+            <div class="icon-placeholder">👤</div>
+            <span>Horrified</span>
+        </div>
+        <div class="desktop-icon" onclick="openProfile('user4')" style="top: 0px; left: 270px; position: absolute;">
+            <div class="icon-placeholder">👤</div>
+            <span>Ace</span>
+        </div>
+        <div class="desktop-icon" onclick="openHtmlTool()" style="top: 0px; left: 360px; position: absolute;">
+            <div class="icon-placeholder" style="background: linear-gradient(135deg, #ffcc00, #ff6600); color: #222;">&lt;/&gt;</div>
+            <span>HTML Tool</span>
+        </div>
+        <div class="text-file" style="top: 0px; left: 450px; position: absolute;" onclick="openTextFile('notes')">
+            <div class="text-file-icon">T</div>
+            <span>mandela</span>
+        </div>
+        <div class="text-file" style="top: 0px; left: 540px; position: absolute;" onclick="openTextFile('ideas')">
+            <div class="text-file-icon">T</div>
+            <span>ideas.txt</span>
+        </div>
+    </div>
+    <!-- ...existing code... -->
 </div>
-
-<div class="text-file" style="top: 91px; left: 90px;" onclick="openTextFile('ideas')">
-    <div class="text-file-icon">T</div>
-    <span>ideas.txt</span>
-</div>
-
-<div class="text-file" style="top: 171px; left: 90px;" onclick="openTextFile('journal')">
-    <div class="text-file-icon">T</div>
-    <span>journal.txt</span>
-</div>
-
-<div class="text-file" style="top: 251px; left: 90px;" onclick="openTextFile('passwords')">
-    <div class="text-file-icon">T</div>
-    <span>passwords.txt</span>
-</div>
-
-<div class="text-file" style="top: 341px; left: 90px;" onclick="openTextFile('todo')">
-    <div class="text-file-icon">T</div>
-    <span>todo.txt</span>
-</div>
-
+<!-- ...existing code... -->
 
     <!-- Taskbar -->
     <div id="toolbar">
@@ -1228,6 +1245,7 @@ document.addEventListener('touchstart', initAudio, { once: true });
             <div class="toolbar-icon" onclick="openProfile('user1')">👤</div>
             <div class="toolbar-icon" onclick="openTextFile('notes')">T</div>
             <div class="toolbar-icon" onclick="openTextFile('ideas')">T</div>
+            <div class="toolbar-icon" onclick="openHtmlTool()" style="color: #222; background: linear-gradient(135deg, #ffcc00, #ff6600);">&lt;/&gt;</div>
         </div>
         <div class="toolbar-separator"></div>
         <div class="toolbar-right">
@@ -1262,6 +1280,10 @@ document.addEventListener('touchstart', initAudio, { once: true });
         <div class="start-menu-item" onclick="openTextFile('ideas')">
             <div class="icon-placeholder">T</div>
             <span>ideas.txt</span>
+        </div>
+        <div class="start-menu-item" onclick="openHtmlTool()">
+            <div class="icon-placeholder" style="background: linear-gradient(135deg, #ffcc00, #ff6600); color: #222;">&lt;/&gt;</div>
+            <span>Format Tool</span>
         </div>
         <div class="start-menu-separator"></div>
         <div class="start-menu-item" onclick="document.getElementById('login-window').style.display='block'; document.getElementById('desktop').style.display='none'">
@@ -1513,6 +1535,40 @@ document.addEventListener('touchstart', initAudio, { once: true });
                         </div>
                     </div>
                 </div>
+            `;
+            
+            document.body.appendChild(newWindow);
+            
+            // Make window draggable
+            makeDraggable(newWindow);
+        }
+        
+        // Open HTML Tool window that loads Format Tool.html in a fake window
+        function openHtmlTool() {
+            // Close start menu if open
+            document.getElementById('start-menu').style.display = 'none';
+            
+            // Create a new window based on template
+            const template = document.getElementById('window-template');
+            const newWindow = template.cloneNode(true);
+            newWindow.id = 'html-tool-window';
+            newWindow.style.display = 'block';
+            newWindow.style.width = '800px';
+            newWindow.style.height = '600px';
+            
+            // Position window in the center
+            newWindow.style.top = '50%';
+            newWindow.style.left = '50%';
+            newWindow.style.transform = 'translate(-50%, -50%)';
+            
+            // Set window title and content
+            const titleBar = newWindow.querySelector('.title-bar-text');
+            titleBar.textContent = 'Format Tool';
+            
+            // Create an iframe to load Format Tool.html
+            const windowBody = newWindow.querySelector('.window-body');
+            windowBody.innerHTML = `
+                <iframe src="Format Tool.html" style="width: 100%; height: 100%; border: none;"></iframe>
             `;
             
             document.body.appendChild(newWindow);
